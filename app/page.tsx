@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button"
 
 export default function ItSystem() {
+
   return (
     <div className="min-h-screen flex items-center justify-center">
       <Card className="w-full max-w-sm">
