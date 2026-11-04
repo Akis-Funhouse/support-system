@@ -5,14 +5,19 @@ import { users, categories } from "@/db/schema";
 
 import { createTicket } from "./actions"
 
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-import { Button } from "@/components/ui/button"
+export const instant = false;
 
 export default async function NewTicketPage({
     searchParams,
@@ -26,119 +31,144 @@ export default async function NewTicketPage({
     const { error } = await searchParams;
 
     return(
-        <main className="min-h-screen flex justify-center p-6 bg-grey-50">
+        <main className="min-h-screen bg-muted/40 px-4 py-10 sm:px-6">
+  <div className="mx-auto max-w-2xl">
 
-            <Card className="w-full max-w-lg h-fit">
+    {/* Tillbaka-länk */}
+    <Button variant="ghost" className="mb-6 -ml-3">
+      <Link href="/tickets">
+        ← Back to tickets
+      </Link>
+    </Button>
 
-                <CardHeader>
-                    <CardTitle>Create New Ticket</CardTitle>
-                </CardHeader>
+    <Card className="border-0 shadow-md">
 
-                <CardContent>
+      {/* Rubrik */}
+      <CardHeader className="space-y-2">
+        <CardTitle className="text-2xl font-bold tracking-tight">
+          Create New Ticket
+        </CardTitle>
 
-                    {error && (
-                        <p role="alert" className="text-red-600 mb-4">
-                            {error === "missing"
-                            ? "Please fill in all fields."
-                            : "Please select valid users and categories."}
-                        </p>
-                    )}
+        <CardDescription>
+          Fill in the information below to report a new support issue.
+        </CardDescription>
+      </CardHeader>
 
-                    <form action={createTicket} className="flex flex-col gap-4">
+      <CardContent>
 
-                        {/* Title */}
-                        <div>
-                            <label className="block mb-1 font-medium">
-                                Title
-                            </label>
+        {/* Felmeddelande */}
+        {error && (
+          <div
+            role="alert"
+            className="mb-6 rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive"
+          >
+            {error === "missing"
+              ? "Please fill in all fields."
+              : "Please select valid users and categories."}
+          </div>
+        )}
 
-                            <input
-                            type="text"
-                            name="title"
-                            required
-                            className="w-full border rounded-md p2"
-                            placeholder="Enter ticket title"
-                            />
-                        </div>
+        <form action={createTicket} className="flex flex-col gap-6">
 
-                        {/* Description */}
-                        <div>
-                            <label className="block mb-1 font-medium">
-                                Description
-                            </label>
+          {/* Title */}
+          <div className="space-y-2">
+            <label htmlFor="title" className="text-sm font-medium">
+              Title
+            </label>
 
-                            <textarea
-                            name="description"
-                            required
-                            className="w-full border rounded-md p-2"
-                            rows={4}
-                            />
-                        </div>
+            <Input
+              id="title"
+              type="text"
+              name="title"
+              required
+              placeholder="Enter ticket title"
+            />
+          </div>
 
-                        {/* Users */}
-                        <div>
-                            <label className="block mb-1 font-medium">
-                                Reported by
-                            </label>
+          {/* Description */}
+          <div className="space-y-2">
+            <label htmlFor="description" className="text-sm font-medium">
+              Description
+            </label>
 
-                            <select
-                            name="userId"
-                            required
-                            defaultValue=""
-                            className="w-full border rounded-md p-2"
-                            >
-                                <option value="" disabled>
-                                    Select a user
-                                </option>
+            <Textarea
+              id="description"
+              name="description"
+              required
+              rows={5}
+              placeholder="Describe the problem in detail..."
+              className="resize-y"
+            />
+          </div>
 
-                                {allUsers.map((user) => (
-                                    <option key={user.id} value={user.id}>
-                                        {user.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
+          {/* User */}
+          <div className="space-y-2">
+            <label htmlFor="userId" className="text-sm font-medium">
+              Reported by
+            </label>
 
-                        {/* Category */}
-                        <div>
-                            <label className="block mb-1 font-medium">
-                                Category
-                            </label>
+            <Select name="userId" required>
+              <SelectTrigger id="userId" className="w-full">
+                <SelectValue placeholder="Select a user" />
+              </SelectTrigger>
 
-                            <select
-                            name="categoryId"
-                            required
-                            defaultValue=""
-                            className="w-full border rounded-md p-2"
-                            >
-                                <option value="" disabled>
-                                    Select a category
-                                </option>
+              <SelectContent>
+                {allUsers.map((user) => (
+                  <SelectItem
+                    key={user.id}
+                    value={String(user.id)}
+                  >
+                    {user.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-                                {allCategories.map((category) => (
-                                    <option key={category.id} value={category.id}>
-                                        {category.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
+          {/* Category */}
+          <div className="space-y-2">
+            <label htmlFor="categoryId" className="text-sm font-medium">
+              Category
+            </label>
 
-                        <Button type="submit" className="w-full">
-                            Create Ticket
-                        </Button>
+            <Select name="categoryId" required>
+              <SelectTrigger id="categoryId" className="w-full">
+                <SelectValue placeholder="Select a category" />
+              </SelectTrigger>
 
-                        <Link
-                        href="/tickets"
-                        className="text-center text-sm text-gray-600 hover:underline"
-                        >
-                        Back to tickets
-                        </Link>
+              <SelectContent>
+                {allCategories.map((category) => (
+                  <SelectItem
+                    key={category.id}
+                    value={String(category.id)}
+                  >
+                    {category.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-                    </form>
+          {/* Knappar */}
+          <div className="flex flex-col-reverse gap-3 border-t pt-6 sm:flex-row sm:justify-end">
 
-                </CardContent>
-            </Card>
+            <Button variant="outline">
+              <Link href="/tickets">
+                Cancel
+              </Link>
+            </Button>
 
-        </main>
+            <Button type="submit">
+              Create Ticket
+            </Button>
+
+          </div>
+
+        </form>
+      </CardContent>
+    </Card>
+
+  </div>
+</main>
     );
 }

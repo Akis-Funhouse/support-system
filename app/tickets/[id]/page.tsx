@@ -1,8 +1,18 @@
 import { db } from "@/db";
 import { tickets, users, categories } from "@/db/schema";
+import { updateTicketStatus } from "./actions";
 
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
+
+import Link from "next/link";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+
+export const instant = false;
 
 export default async function TicketPage({
     params,
@@ -40,86 +50,151 @@ export default async function TicketPage({
     }
 
     return(
-        <main className="min-h-screen bg-gray-100 p-6">
+        <main className="min-h-screen bg-muted/40 px-4 py-10 sm:px-6">
+  <div className="mx-auto max-w-3xl">
 
-            <div className="max-w-3xl mx-auto">
+    {/* Tillbaka-länk */}
+    <Button variant="ghost" className="mb-6 -ml-3">
+      <Link href="/tickets">
+        ← Back to tickets
+      </Link>
+    </Button>
 
-                <a
-                href="/tickets"
-                className="text-blie-600 hover:underline mb-6 inline-block"
-                >
-                 Back to tickets
-                </a>
+    {/* Ärendets innehåll */}
+    <Card className="border-0 shadow-md">
 
-                <div className="bg-white rounded-xl shadow-sm p-6">
+      <CardHeader className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm text-muted-foreground">
+            Support ticket #{ticket.id}
+          </p>
 
-                    <h1 className="text-3xl font-bold mb-4">
-                        {ticket.title}
-                    </h1>
+          <Badge
+            variant={
+              ticket.status === "resolved"
+                ? "default"
+                : ticket.status === "in-progress"
+                ? "secondary"
+                : "outline"
+            }
+            className="px-3 py-1"
+          >
+            {ticket.status === "in-progress"
+              ? "In progress"
+              : ticket.status === "resolved"
+              ? "Resolved"
+              : "Open"}
+          </Badge>
+        </div>
 
-                    <div className="mb-6">
-                        <span className="font-semibold">
-                            Status:
-                        </span>
+        <CardTitle className="text-2xl font-bold tracking-tight sm:text-3xl">
+          {ticket.title}
+        </CardTitle>
+      </CardHeader>
 
-                        <span className="px-3 py-1 rounded-full bg-blue-200 text-blue-600">
-                            {ticket.status === "in-progress"
-                            ? "In progress"
-                            : ticket.status === "resolved"
-                            ? "Resolved"
-                            : "Open"}
-                        </span>
-                    </div>
+      <CardContent className="space-y-8">
 
-                    <div className="mb-6">
-                        <h2 className="text-lg font-semibold mb-2">
-                            Description
-                        </h2>
+        {/* Beskrivning */}
+        <section>
+          <h2 className="mb-3 text-lg font-semibold">
+            Description
+          </h2>
 
-                        <p className="text-gray-700 whitespace-pre-wrap">
-                            {ticket.description}
-                        </p>
-                    </div>
+          <p className="whitespace-pre-wrap leading-7 text-muted-foreground">
+            {ticket.description}
+          </p>
+        </section>
 
-                    <hr className="my-6"/>
+        <Separator />
 
-                    <div className="mb-4">
-                        <h2 className="font-semibold">
-                            Category
-                        </h2>
+        {/* Ärendeinformation */}
+        <section className="grid gap-6 sm:grid-cols-2">
 
-                        <p className="text-gray-600">
-                            {ticket.categoryName}
-                        </p>
-                    </div>
+          <div>
+            <h2 className="mb-1 text-sm font-medium text-muted-foreground">
+              Category
+            </h2>
+            <p className="font-medium">
+              {ticket.categoryName}
+            </p>
+          </div>
 
-                    <div className="mb-4">
-                        <h2 className="font-semibold">
-                            Reported by
-                        </h2>
+          <div>
+            <h2 className="mb-1 text-sm font-medium text-muted-foreground">
+              Created
+            </h2>
+            <p className="font-medium">
+              {ticket.createdAt.toLocaleString("sv-SE")}
+            </p>
+          </div>
 
-                        <p className="text-gray-600">
-                            {ticket.userName}
-                        </p>
+          <div className="sm:col-span-2">
+            <h2 className="mb-1 text-sm font-medium text-muted-foreground">
+              Reported by
+            </h2>
+            <p className="font-medium">
+              {ticket.userName}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {ticket.userEmail}
+            </p>
+          </div>
 
-                        <p className="text-gray-600">
-                            {ticket.userEmail}
-                        </p>
-                    </div>
+        </section>
 
-                    <div>
-                        <h2 className="font-semibold">
-                            Created
-                        </h2>
+        <Separator />
 
-                        <p>
-                            {ticket.createdAt.toLocaleString("sv-SE")}
-                        </p>
-                    </div>
+        {/* Ändra status */}
+        <section className="rounded-xl bg-muted/50 p-5">
+          <h2 className="mb-1 text-lg font-semibold">
+            Update ticket status
+          </h2>
 
-                </div>
+          <p className="mb-5 text-sm text-muted-foreground">
+            Choose a new status for this support ticket.
+          </p>
+
+          <form
+            action={updateTicketStatus}
+            className="flex flex-col gap-4 sm:flex-row sm:items-end"
+          >
+            <input
+              type="hidden"
+              name="ticketId"
+              value={ticket.id}
+            />
+
+            <div className="flex-1 space-y-2">
+              <label
+                htmlFor="status"
+                className="text-sm font-medium"
+              >
+                New status
+              </label>
+
+              <select
+                id="status"
+                name="status"
+                defaultValue={ticket.status ?? "open"}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <option value="open">Open</option>
+                <option value="in-progress">In progress</option>
+                <option value="resolved">Resolved</option>
+              </select>
             </div>
-        </main>
+
+            <Button type="submit" className="w-full sm:w-auto">
+              Save status
+            </Button>
+          </form>
+        </section>
+
+      </CardContent>
+    </Card>
+
+  </div>
+</main>
     );
 
 }
