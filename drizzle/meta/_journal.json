@@ -8,6 +8,13 @@
       "when": 1792559941785,
       "tag": "0000_silky_pyro",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793693078463,
+      "tag": "0001_lowly_mad_thinker",
+      "breakpoints": true
     }
   ]
 }
