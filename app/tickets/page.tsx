@@ -1,4 +1,3 @@
-
 import Link from "next/link";
 
 import { db } from "@/db";
@@ -11,6 +10,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+
+import { Button } from "@/components/ui/button";
 
 export default async function TicketsPage() {
     "use cache"
@@ -42,7 +43,14 @@ export default async function TicketsPage() {
           View and manage all reported support tickets.
         </p>
 
-        <div className="grid gap-4">
+        <div></div>
+        <Button className="">
+          <Link href="/tickets/new">
+          Create New Ticket
+          </Link>
+          </Button>
+
+        <div className="grid gap-4 p-4">
 
           {allTickets.length === 0 ? (
             <p>No support tickets found.</p>
