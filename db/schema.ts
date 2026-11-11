@@ -6,6 +6,7 @@ import {
   varchar,
   text,
   timestamp,
+  integer,
 } from "drizzle-orm/pg-core";
 
 
@@ -54,7 +55,7 @@ export const ticketsRelations = relations(tickets, ({ one }) => ({
 export const comments = pgTable("comments", {
   id: serial().primaryKey(),
   content: text().notNull(),
-  ticketId: serial()
+  ticketId: integer()
     .notNull()
     .references(() => tickets.id),
   createdAt: timestamp().notNull().defaultNow(),

@@ -1,0 +1,1 @@
+ALTER TABLE "comments" ALTER COLUMN "ticketId" SET DATA TYPE integer;

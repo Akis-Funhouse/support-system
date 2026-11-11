@@ -1,14 +1,23 @@
+
 import Link from "next/link";
 
 import { db } from "@/db";
 import { users, categories } from "@/db/schema";
 
-import { createTicket } from "./actions"
+import { createTicket } from "./actions";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+
 import {
   Select,
   SelectContent,
@@ -20,155 +29,229 @@ import {
 export const instant = false;
 
 export default async function NewTicketPage({
-    searchParams,
+  searchParams,
 }: {
-    searchParams: Promise<{ error?: string}>;
+  searchParams: Promise<{ error?: string }>;
 }) {
+  const allUsers = await db.select().from(users);
+  const allCategories = await db.select().from(categories);
 
-    const allUsers = await db.select().from(users);
-    const allCategories = await db.select().from(categories);
+  const { error } = await searchParams;
 
-    const { error } = await searchParams;
+  return (
+    <main className="min-h-screen bg-muted/40 px-4 py-10 sm:px-6">
+      <div className="mx-auto max-w-3xl">
 
-    return(
-        <main className="min-h-screen bg-muted/40 px-4 py-10 sm:px-6">
-  <div className="mx-auto max-w-2xl">
+        {/* Tillbaka */}
+        <div className="mb-6">
+          <Button variant="ghost" className="-ml-3">
+            <Link href="/tickets">
+              ← Back to tickets
+            </Link>
+          </Button>
+        </div>
 
-    {/* Tillbaka-länk */}
-    <Button variant="ghost" className="mb-6 -ml-3">
-      <Link href="/tickets">
-        ← Back to tickets
-      </Link>
-    </Button>
+        {/* Sidhuvud */}
+        <div className="mb-8">
+          <Badge variant="secondary" className="mb-3">
+            IT Department
+          </Badge>
 
-    <Card className="border-0 shadow-md">
+          <h1 className="text-3xl font-bold tracking-tight">
+            Create New Ticket
+          </h1>
 
-      {/* Rubrik */}
-      <CardHeader className="space-y-2">
-        <CardTitle className="text-2xl font-bold tracking-tight">
-          Create New Ticket
-        </CardTitle>
+          <p className="mt-2 text-muted-foreground">
+            Report a technical issue to the IT support team.
+            Fill in the details below to create a new ticket.
+          </p>
+        </div>
 
-        <CardDescription>
-          Fill in the information below to report a new support issue.
-        </CardDescription>
-      </CardHeader>
+        {/* Formulär */}
+        <Card className="border-0 shadow-md">
 
-      <CardContent>
+          <CardHeader className="border-b pb-6">
+            <CardTitle className="text-xl">
+              Ticket Information
+            </CardTitle>
 
-        {/* Felmeddelande */}
-        {error && (
-          <div
-            role="alert"
-            className="mb-6 rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive"
-          >
-            {error === "missing"
-              ? "Please fill in all fields."
-              : "Please select valid users and categories."}
-          </div>
-        )}
+            <CardDescription>
+              Provide as much information as possible so
+              the support team can help you.
+            </CardDescription>
+          </CardHeader>
 
-        <form action={createTicket} className="flex flex-col gap-6">
+          <CardContent className="pt-6">
 
-          {/* Title */}
-          <div className="space-y-2">
-            <label htmlFor="title" className="text-sm font-medium">
-              Title
-            </label>
+            {/* Felmeddelande */}
+            {error && (
+              <div
+                role="alert"
+                className="mb-6 rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive"
+              >
+                <p className="font-semibold">
+                  Unable to create ticket
+                </p>
 
-            <Input
-              id="title"
-              type="text"
-              name="title"
-              required
-              placeholder="Enter ticket title"
-            />
-          </div>
+                <p className="mt-1">
+                  {error === "missing"
+                    ? "Please fill in all fields."
+                    : "Please select valid users and categories."}
+                </p>
+              </div>
+            )}
 
-          {/* Description */}
-          <div className="space-y-2">
-            <label htmlFor="description" className="text-sm font-medium">
-              Description
-            </label>
+            <form action={createTicket} className="space-y-7">
 
-            <Textarea
-              id="description"
-              name="description"
-              required
-              rows={5}
-              placeholder="Describe the problem in detail..."
-              className="resize-y"
-            />
-          </div>
+              {/* Title */}
+              <div className="space-y-2">
+                <label
+                  htmlFor="title"
+                  className="text-sm font-semibold"
+                >
+                  Ticket Title
+                </label>
 
-          {/* User */}
-          <div className="space-y-2">
-            <label htmlFor="userId" className="text-sm font-medium">
-              Reported by
-            </label>
+                <Input
+                  id="title"
+                  type="text"
+                  name="title"
+                  required
+                  placeholder="e.g. Cannot connect to Wi-Fi"
+                  className="h-11 bg-background"
+                />
 
-            <Select name="userId" required>
-              <SelectTrigger id="userId" className="w-full">
-                <SelectValue placeholder="Select a user" />
-              </SelectTrigger>
+                <p className="text-xs text-muted-foreground">
+                  Give your issue a short and descriptive title.
+                </p>
+              </div>
 
-              <SelectContent>
-                {allUsers.map((user) => (
-                  <SelectItem
-                    key={user.id}
-                    value={String(user.id)}
+              {/* Description */}
+              <div className="space-y-2">
+                <label
+                  htmlFor="description"
+                  className="text-sm font-semibold"
+                >
+                  Description
+                </label>
+
+                <Textarea
+                  id="description"
+                  name="description"
+                  required
+                  rows={6}
+                  placeholder="Describe the problem, what happened and when it started..."
+                  className="min-h-36 resize-y bg-background"
+                />
+
+                <p className="text-xs text-muted-foreground">
+                  Include any relevant details that could help
+                  identify and resolve the issue.
+                </p>
+              </div>
+
+              {/* Separering */}
+              <div className="border-t" />
+
+              {/* User */}
+              <div className="space-y-2">
+                <label
+                  htmlFor="userId"
+                  className="text-sm font-semibold"
+                >
+                  Reported By
+                </label>
+
+                <Select name="userId" required>
+                  <SelectTrigger
+                    id="userId"
+                    className="h-11 w-full bg-background"
                   >
-                    {user.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+                    <SelectValue placeholder="Select a user" />
+                  </SelectTrigger>
 
-          {/* Category */}
-          <div className="space-y-2">
-            <label htmlFor="categoryId" className="text-sm font-medium">
-              Category
-            </label>
+                  <SelectContent>
+                    {allUsers.map((user) => (
+                      <SelectItem
+                        key={user.id}
+                        value={String(user.id)}
+                      >
+                        {user.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
 
-            <Select name="categoryId" required>
-              <SelectTrigger id="categoryId" className="w-full">
-                <SelectValue placeholder="Select a category" />
-              </SelectTrigger>
+                <p className="text-xs text-muted-foreground">
+                  Select the user reporting this issue.
+                </p>
+              </div>
 
-              <SelectContent>
-                {allCategories.map((category) => (
-                  <SelectItem
-                    key={category.id}
-                    value={String(category.id)}
+              {/* Category */}
+              <div className="space-y-2">
+                <label
+                  htmlFor="categoryId"
+                  className="text-sm font-semibold"
+                >
+                  Category
+                </label>
+
+                <Select name="categoryId" required>
+                  <SelectTrigger
+                    id="categoryId"
+                    className="h-11 w-full bg-background"
                   >
-                    {category.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
 
-          {/* Knappar */}
-          <div className="flex flex-col-reverse gap-3 border-t pt-6 sm:flex-row sm:justify-end">
+                  <SelectContent>
+                    {allCategories.map((category) => (
+                      <SelectItem
+                        key={category.id}
+                        value={String(category.id)}
+                      >
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
 
-            <Button variant="outline">
-              <Link href="/tickets">
-                Cancel
-              </Link>
-            </Button>
+                <p className="text-xs text-muted-foreground">
+                  Choose the category that best describes the issue.
+                </p>
+              </div>
 
-            <Button type="submit">
-              Create Ticket
-            </Button>
+              {/* Knappar */}
+              <div className="flex flex-col-reverse gap-3 border-t pt-6 sm:flex-row sm:justify-end">
 
-          </div>
+                <Button
+                  variant="outline"
+                  className="sm:min-w-28"
+                >
+                  <Link href="/tickets">
+                    Cancel
+                  </Link>
+                </Button>
 
-        </form>
-      </CardContent>
-    </Card>
+                <Button
+                  type="submit"
+                  className="sm:min-w-40"
+                >
+                  Create Ticket
+                </Button>
 
-  </div>
-</main>
-    );
+              </div>
+
+            </form>
+          </CardContent>
+        </Card>
+
+        {/* Information längst ner */}
+        <p className="mt-6 text-center text-xs text-muted-foreground">
+          Need help? Contact your IT support team.
+        </p>
+
+      </div>
+    </main>
+  );
 }
